@@ -1,4 +1,5 @@
 #include<string>
+#include<iostream>
 
 using namespace std;
 
@@ -15,8 +16,8 @@ class MaterialReciclable{
     public:
         MaterialReciclable();
         // Constructor
-        MaterialReciclable(string tipo, float cant, bool limpieza, float precio, int facilidadRec, int tiempoDesc){
-            tipo = tipo;
+        MaterialReciclable(string tip, float cant, bool limpieza, float precio, int facilidadRec, int tiempoDesc){
+            tipo = tip;
             cantidad = cant;
             limpiezaRequerida = limpieza;
             precioxKilo = precio;
@@ -79,5 +80,14 @@ class MaterialReciclable{
 
         double valorReciclable() const {
             return cantidad * precioxKilo;
+        }
+
+        void mostrarDatos() const{
+            cout << "\n"
+                 << "El tipo de material reciclable es: " << tipo << "\n"
+                 << "Se brindan: " << cantidad << "kg\n"
+                 << "El precio estimado por kilo es: $" << precioxKilo << "\n"
+                 << "Requiere limpieza: " << (limpiezaRequerida ? "Si" : "No") << "\n"
+                 << "Se estima un valor total de: $" << valorReciclable() << "\n";
         }
 };

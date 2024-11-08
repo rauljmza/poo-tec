@@ -13,10 +13,10 @@ class Recolector{
         int rating;               // Calificacion del recolector en un rango de 1-5 estrellas
 
     public:
-        Recolector();
+        //Recolector();
         // Constructor
-        Recolector(string nombre, string zona, string materialPri){
-            nombre = nombre;
+        Recolector(string nom, string zona, string materialPri){
+            nombre = nom;
             zonaTrabajo =  zona;
             materialPrincipal = materialPri;
             totalRecolectado = 0;
@@ -74,7 +74,8 @@ class Recolector{
         }
 
         void mostrarPerfil() const{
-            cout << "Recolector (reciclador): " << nombre << "\n"
+            cout << "\n"
+                 << "Recolector (reciclador): " << nombre << "\n"
                  << "Zona en la que trabaja: " << zonaTrabajo << "\n"
                  << "Material principal que recolecta: " << materialPrincipal << "\n"
                  << "Rating (1-5 estrellas): " << rating << "\n"
