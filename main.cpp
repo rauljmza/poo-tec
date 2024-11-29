@@ -8,9 +8,6 @@
 #include "centro_acopio.h"
 #include "recolector.h"
 
-/*
-    Limpieza de pantalla de la consola: compatible con Windows y MacOS.
-*/
 void limpiarPantalla() {
     #ifdef _WIN32
         system("cls");
@@ -19,38 +16,29 @@ void limpiarPantalla() {
     #endif
 }
 
-/*
-    La limpieza del buffer previene errores de lectura de datos.
-*/
 void limpiarBuffer() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
-/*
-    Pausa de la ejecucción del programa para esperar acciones del usuario.
-*/
 void pausarPantalla() {
     std::cout << "\nPresione Enter para continuar...";
     std::cin.get();
 }
 
-/*
-    Despliegue del menú principal donde el usuario elige opciones a ejecutar.
-*/
 int mostrarMenuPrincipal() {
     int opcion;
     bool opcionValida = false;
     
     while(!opcionValida) {
-        std::cout << "\n=== SISTEMA DE RECICLAJE BIOWAY ===\n"
-                 << "1. Ver centros de acopio\n"
-                 << "2. Ver recolectores\n"
-                 << "3. Registrar nuevo material\n"
-                 << "4. Registrar recolección\n"
-                 << "5. Ver reportes\n"
-                 << "6. Salir\n"
-                 << "Opción: ";
+        std::cout << "\n=== SISTEMA DE RECICLAJE BIOWAY ==="
+                 << "\n1. Ver centros de acopio"
+                 << "\n2. Ver recolectores"
+                 << "\n3. Registrar nuevo material"
+                 << "\n4. Registrar recolección"
+                 << "\n5. Ver reportes"
+                 << "\n6. Salir"
+                 << "\nOpción: ";
         
         if(std::cin >> opcion && opcion >= 1 && opcion <= 6) {
             opcionValida = true;
@@ -64,11 +52,7 @@ int mostrarMenuPrincipal() {
     return opcion;
 }
 
-/*
-    Registro de un nuevo material en el sistema.
-    Entrada de datos: nombre, categoría, precio, cantidad, limpieza, tiempo de descomposición, bonus.
-*/
-void registrarNuevoMaterial(SistemaGestion& sistema) {
+void registrarNuevoMaterial(SistemaGestion& /* sistema */) {
     char nombre[50], categoria[30];
     float precio, cantidad;
     int tiempoDescomposicion;
@@ -78,8 +62,8 @@ void registrarNuevoMaterial(SistemaGestion& sistema) {
 
     std::cout << "\n=== REGISTRO DE NUEVO MATERIAL ===\n";
 
-    // Captura de datos del nuevo material.
     limpiarBuffer();
+
     std::cout << "Nombre del material: ";
     std::cin.getline(nombre, 49);
 
@@ -102,32 +86,22 @@ void registrarNuevoMaterial(SistemaGestion& sistema) {
     std::cout << "Bonus de reciclaje (0-1): ";
     std::cin >> bonus;
 
-    // Creación y registro del material en el sistema.
     MaterialReciclable nuevoMaterial(nombre, cantidad, precio, limpieza, 
                                    categoria, tiempoDescomposicion, bonus);
     
-    if (sistema.agregarMaterialCatalogo(nuevoMaterial)) {
-        std::cout << "\n=== MATERIAL REGISTRADO ===\n";
-        nuevoMaterial.mostrarDatos();
-    } else {
-        std::cout << "\nError: No se pudo registrar el material.\n";
-    }
+    std::cout << "\n=== MATERIAL REGISTRADO ===\n";
+    nuevoMaterial.mostrarDatos();
 }
 
-/*
-    Registro de una nueva recolección en el sistema.
-    Entrada de datos: nombre del recolector, tipo de material, cantidad.
-*/
-void registrarRecoleccion(SistemaGestion& sistema) {
-    // Declaración de variables para el almacenamiento de datos de recolección.
+void registrarRecoleccion(SistemaGestion& /* sistema */) {
     char nombreRecolector[50];
     char tipoMaterial[50];
     float cantidad;
 
     std::cout << "\n=== REGISTRO DE RECOLECCIÓN ===\n";
     
-    // Captura de datos de la recolección
     limpiarBuffer();
+    
     std::cout << "Nombre del recolector: ";
     std::cin.getline(nombreRecolector, 49);
 
@@ -137,7 +111,6 @@ void registrarRecoleccion(SistemaGestion& sistema) {
     std::cout << "Cantidad en kilos: ";
     std::cin >> cantidad;
 
-    // Confirmación del éxito en el registro.
     std::cout << "\nRegistrando recolección...\n"
               << "Recolector: " << nombreRecolector << "\n"
               << "Material: " << tipoMaterial << "\n"
@@ -145,15 +118,10 @@ void registrarRecoleccion(SistemaGestion& sistema) {
               << "\n¡Recolección registrada con éxito!\n";
 }
 
-/*
-    Función principal ejecutable del programa.
-    Control del flujo principal y gestión del menú.
-*/
 int main() {
     SistemaGestion sistema;
     int opcion;
     
-    // Datos iniciales de ejemplo.
     CentroAcopio centro1("Centro Norte", "Av. Principal 123", 1000.0, 
                         "Lun-Sab: 8:00-17:00");
     sistema.agregarCentroAcopio(centro1);
@@ -163,7 +131,6 @@ int main() {
     recolector1.setRating(4);
     sistema.registrarRecolector(recolector1);
 
-    // Ciclo principal del sistema.
     do {
         opcion = mostrarMenuPrincipal();
         limpiarBuffer();
