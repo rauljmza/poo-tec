@@ -5,10 +5,16 @@
 #include "recolector.h"
 #include "material_reciclable.h"
 
+/* Límites máximos del sistema */
 #define MAX_CENTROS 10
 #define MAX_RECOLECTORES 20
 #define MAX_MATERIALES_CATALOGO 30
 
+/* 
+ * Clase SistemaGestion
+ * Sistema central que coordina centros de acopio, recolectores 
+ * y el catálogo de materiales reciclables.
+ */
 class SistemaGestion {
 private:
     CentroAcopio centros[MAX_CENTROS];
@@ -19,17 +25,18 @@ private:
     int numMaterialesCatalogo;
 
 public:
+    /* Constructor: inicializa el sistema con materiales básicos */
     SistemaGestion() {
         numCentros = 0;
         numRecolectores = 0;
         numMaterialesCatalogo = 0;
         
-        // Inicializar catálogo con materiales básicos
         agregarMaterialCatalogo(MaterialReciclable("PET", 0, 15.50, true, "Plástico", 450, 0.1));
         agregarMaterialCatalogo(MaterialReciclable("Vidrio", 0, 8.75, true, "Vidrio", 4000, 0.15));
         agregarMaterialCatalogo(MaterialReciclable("Papel", 0, 5.25, false, "Papel", 1, 0.05));
     }
 
+    /* Métodos principales del sistema */
     bool agregarCentroAcopio(const CentroAcopio& centro) {
         if (numCentros < MAX_CENTROS) {
             centros[numCentros] = centro;
@@ -72,40 +79,11 @@ public:
         return false;
     }
 
-    void calcularEstadisticasGenerales() const {
-        float totalMaterialRecolectado = 0;
-        float capacidadTotalSistema = 0;
-        float capacidadUtilizada = 0;
+    /* Métodos para reportes y estadísticas */
+    void calcularEstadisticasGenerales() const;
+    void mostrarCatalogoMateriales() const;
 
-        for (int i = 0; i < numRecolectores; i++) {
-            totalMaterialRecolectado += recolectores[i].getTotalRecolectado();
-        }
-
-        for (int i = 0; i < numCentros; i++) {
-            capacidadTotalSistema += centros[i].getCapacidadMaxima();
-            capacidadUtilizada += centros[i].getCapacidadActual();
-        }
-
-        std::cout << "\n=== Estadísticas Generales del Sistema ==="
-                 << "\nTotal de centros: " << numCentros
-                 << "\nTotal de recolectores: " << numRecolectores
-                 << "\nTotal material recolectado: " << totalMaterialRecolectado << " kg"
-                 << "\nCapacidad total del sistema: " << capacidadTotalSistema << " kg"
-                 << "\nCapacidad utilizada: " << capacidadUtilizada << " kg"
-                 << "\nPorcentaje de utilización: " 
-                 << (capacidadTotalSistema > 0 ? 
-                     (capacidadUtilizada / capacidadTotalSistema * 100) : 0) 
-                 << "%" << std::endl;
-    }
-
-    void mostrarCatalogoMateriales() const {
-        std::cout << "\n=== Catálogo de Materiales ===\n";
-        for (int i = 0; i < numMaterialesCatalogo; i++) {
-            catalogoMateriales[i].mostrarDatos();
-        }
-    }
-
-    // Getters
+    /* Métodos de acceso */
     size_t getTotalCentros() const { return numCentros; }
     size_t getTotalRecolectores() const { return numRecolectores; }
     size_t getTotalMaterialesCatalogo() const { return numMaterialesCatalogo; }
