@@ -1,113 +1,78 @@
-#ifndef MATERIAL_RECICLABLE_H  // Guarda de inclusión
+#ifndef MATERIAL_RECICLABLE_H
 #define MATERIAL_RECICLABLE_H
 
-// Inclusiones necesarias
-#include "material.h"           // Incluimos la clase base
-#include <string>              // Para std::string
-
-// Forward declarations si fueran necesarias
-// (en este caso no las necesitamos)
+#include "material.h"
+#include <string.h>
 
 class MaterialReciclable : public Material {
 private:
-    bool limpiezaRequerida;      // Indica si el material requiere limpieza
-    std::string categoria;        // Categoría del material (papel, plástico, etc.)
-    int tiempoDescomposicion;     // Tiempo de descomposición en años
-    float bonusReciclaje;         // Bonificación adicional por reciclaje
-    std::string estado;           // Estado actual del material reciclable
+    bool limpiezaRequerida;
+    char categoria[30];
+    int tiempoDescomposicion;
+    float bonusReciclaje;
+    char estado[20];
     
 public:
-    // Constructor con valores por defecto
-    MaterialReciclable(std::string _nombre = "", float _cantidad = 0.0, 
+    MaterialReciclable(const char* _nombre = "", float _cantidad = 0.0, 
                       float _precioBase = 0.0, bool _limpiezaRequerida = false,
-                      std::string _categoria = "", int _tiempoDesc = 0,
-                      float _bonusReciclaje = 0.0);
+                      const char* _categoria = "", int _tiempoDesc = 0,
+                      float _bonusReciclaje = 0.0)
+        : Material(_nombre, _cantidad, _precioBase) {
+        limpiezaRequerida = _limpiezaRequerida;
+        strncpy(categoria, _categoria, 29);
+        categoria[29] = '\0';
+        tiempoDescomposicion = _tiempoDesc;
+        bonusReciclaje = _bonusReciclaje;
+        strcpy(estado, "nuevo");
+    }
     
-    // El resto de la declaración de métodos...
-    void procesarMaterial();
-    bool validarCalidad() const;
-    float calcularValor() const override;
-    void mostrarDatos() const override;
+    float calcularValor() const {
+        float valorBase = Material::calcularValor();
+        return valorBase * (1.0 + bonusReciclaje);
+    }
     
-    // Getters
-    bool getLimpiezaRequerida() const;
-    std::string getCategoria() const;
-    int getTiempoDescomposicion() const;
-    float getBonusReciclaje() const;
-    std::string getEstado() const;
+    void mostrarDatos() const {
+        Material::mostrarDatos();
+        std::cout << "Categoría: " << categoria
+                 << "\nRequiere limpieza: " << (limpiezaRequerida ? "Sí" : "No")
+                 << "\nTiempo de descomposición: " << tiempoDescomposicion << " años"
+                 << "\nBonus de reciclaje: " << (bonusReciclaje * 100) << "%"
+                 << "\nEstado: " << estado << std::endl;
+    }
     
-    // Setters
-    void setLimpiezaRequerida(bool _limpiezaRequerida);
-    void setCategoria(std::string _categoria);
-    void setTiempoDescomposicion(int _tiempo);
-    void setBonusReciclaje(float _bonus);
-    void setEstado(std::string _estado);
+    bool validarCalidad() const {
+        return !limpiezaRequerida || strcmp(estado, "procesado") == 0;
+    }
+    
+    void procesarMaterial() {
+        if (validarCalidad()) {
+            strcpy(estado, "procesado");
+        } else {
+            strcpy(estado, "rechazado");
+        }
+    }
+    
+    const char* getNombre() const { return Material::getNombre(); }
+    float getCantidad() const { return Material::getCantidad(); }
+    const char* getCategoria() const { return categoria; }
+    const char* getEstado() const { return estado; }
+    bool getLimpiezaRequerida() const { return limpiezaRequerida; }
+    int getTiempoDescomposicion() const { return tiempoDescomposicion; }
+    float getBonusReciclaje() const { return bonusReciclaje; }
+
+    MaterialReciclable& operator=(const MaterialReciclable& otro) {
+        if (this != &otro) {
+            Material::operator=(otro);
+            limpiezaRequerida = otro.limpiezaRequerida;
+            strncpy(categoria, otro.categoria, 29);
+            categoria[29] = '\0';
+            tiempoDescomposicion = otro.tiempoDescomposicion;
+            bonusReciclaje = otro.bonusReciclaje;
+            strncpy(estado, otro.estado, 19);
+            estado[19] = '\0';
+        }
+        return *this;
+    }
 };
 
-// Implementación de los métodos
-inline MaterialReciclable::MaterialReciclable(std::string _nombre, float _cantidad, 
-    float _precioBase, bool _limpiezaRequerida, std::string _categoria, 
-    int _tiempoDesc, float _bonusReciclaje) 
-    : Material(_nombre, _cantidad, _precioBase) {
-    limpiezaRequerida = _limpiezaRequerida;
-    categoria = _categoria;
-    tiempoDescomposicion = _tiempoDesc;
-    bonusReciclaje = _bonusReciclaje;
-    estado = "nuevo";
-}
-
-inline void MaterialReciclable::procesarMaterial() {
-    if (validarCalidad()) {
-        estado = "procesado";
-    } else {
-        estado = "rechazado";
-    }
-}
-
-inline bool MaterialReciclable::validarCalidad() const {
-    return !limpiezaRequerida || estado == "procesado";
-}
-
-inline float MaterialReciclable::calcularValor() const {
-    float valorBase = Material::calcularValor();
-    return valorBase * (1.0 + bonusReciclaje);
-}
-
-inline void MaterialReciclable::mostrarDatos() const {
-    Material::mostrarDatos();
-    std::cout << "Categoría: " << categoria
-             << "\nRequiere limpieza: " << (limpiezaRequerida ? "Sí" : "No")
-             << "\nTiempo de descomposición: " << tiempoDescomposicion << " años"
-             << "\nBonus de reciclaje: " << (bonusReciclaje * 100) << "%"
-             << "\nEstado: " << estado << std::endl;
-}
-
-// Getters
-inline bool MaterialReciclable::getLimpiezaRequerida() const { return limpiezaRequerida; }
-inline std::string MaterialReciclable::getCategoria() const { return categoria; }
-inline int MaterialReciclable::getTiempoDescomposicion() const { return tiempoDescomposicion; }
-inline float MaterialReciclable::getBonusReciclaje() const { return bonusReciclaje; }
-inline std::string MaterialReciclable::getEstado() const { return estado; }
-
-// Setters
-inline void MaterialReciclable::setLimpiezaRequerida(bool _limpiezaRequerida) {
-    limpiezaRequerida = _limpiezaRequerida;
-}
-
-inline void MaterialReciclable::setCategoria(std::string _categoria) {
-    categoria = _categoria;
-}
-
-inline void MaterialReciclable::setTiempoDescomposicion(int _tiempo) {
-    if (_tiempo >= 0) tiempoDescomposicion = _tiempo;
-}
-
-inline void MaterialReciclable::setBonusReciclaje(float _bonus) {
-    if (_bonus >= 0 && _bonus <= 1) bonusReciclaje = _bonus;
-}
-
-inline void MaterialReciclable::setEstado(std::string _estado) {
-    estado = _estado;
-}
-
-#endif // MATERIAL_RECICLABLE_H
+#endif

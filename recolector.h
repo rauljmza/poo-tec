@@ -1,88 +1,76 @@
 #ifndef RECOLECTOR_H
 #define RECOLECTOR_H
 
-#include <string>
-#include <vector>
 #include "material_reciclable.h"
 #include "registro_recoleccion.h"
 
-// Forward declaration para evitar dependencia circular
-class CentroAcopio;
+#define MAX_MATERIALES 10
+#define MAX_REGISTROS 50
+#define MAX_ESPECIALIZACIONES 5
 
 class Recolector {
 private:
-    std::string nombre;                                    // Nombre del recolector
-    std::string zona;                                      // Zona de trabajo asignada
-    std::vector<std::string> materialesEspecializados;     // Materiales en los que está especializado
-    float totalRecolectado;                               // Total en kg recolectados
-    int rating;                                           // Calificación del recolector (1-5)
-    std::vector<MaterialReciclable> materialesActuales;    // Materiales en posesión
-    std::vector<RegistroRecoleccion> historialRecolecciones; // Historial de recolecciones
+    char nombre[50];
+    char zona[50];
+    char materialesEspecializados[MAX_ESPECIALIZACIONES][30];
+    int numEspecializaciones;
+    float totalRecolectado;
+    int rating;
+    MaterialReciclable materialesActuales[MAX_MATERIALES];
+    int numMaterialesActuales;
+    RegistroRecoleccion historialRecolecciones[MAX_REGISTROS];
+    int numRegistros;
 
 public:
-    // Constructor
-    Recolector(std::string _nombre, std::string _zona) 
-        : nombre(_nombre), zona(_zona), totalRecolectado(0.0), rating(0) {}
-
-    // Método para agregar un material especializado
-    void agregarMaterialEspecializado(const std::string& material) {
-        materialesEspecializados.push_back(material);
+    Recolector(const char* _nombre = "", const char* _zona = "") {
+        strncpy(nombre, _nombre, 49);
+        nombre[49] = '\0';
+        strncpy(zona, _zona, 49);
+        zona[49] = '\0';
+        totalRecolectado = 0.0;
+        rating = 0;
+        numEspecializaciones = 0;
+        numMaterialesActuales = 0;
+        numRegistros = 0;
     }
 
-    // Método para registrar una nueva recolección
-    bool registrarRecoleccion(const MaterialReciclable& material) {
-        if (material.getCantidad() > 0) {
-            materialesActuales.push_back(material);
-            totalRecolectado += material.getCantidad();
-            
-            // Crear y guardar el registro
-            RegistroRecoleccion registro(
-                "Fecha actual", // En sistema real sería fecha actual
-                material.getNombre(),
-                material.getCantidad(),
-                zona
-            );
-            historialRecolecciones.push_back(registro);
+    bool agregarMaterialEspecializado(const char* material) {
+        if (numEspecializaciones < MAX_ESPECIALIZACIONES) {
+            strncpy(materialesEspecializados[numEspecializaciones], material, 29);
+            materialesEspecializados[numEspecializaciones][29] = '\0';
+            numEspecializaciones++;
             return true;
         }
         return false;
     }
 
-    // Método para transferir materiales a un centro de acopio
-    bool transferirMaterialACentro(CentroAcopio& centro);  // Declaración adelantada
+    bool registrarRecoleccion(const MaterialReciclable& material) {
+        if (material.getCantidad() > 0 && 
+            numMaterialesActuales < MAX_MATERIALES &&
+            numRegistros < MAX_REGISTROS) {
+            
+            materialesActuales[numMaterialesActuales] = material;
+            numMaterialesActuales++;
+            totalRecolectado += material.getCantidad();
+            
+            // Usando constructor con parámetros de RegistroRecoleccion
+            historialRecolecciones[numRegistros] = RegistroRecoleccion(
+                "Fecha actual",
+                material.getNombre(),
+                material.getCantidad(),
+                zona
+            );
+            numRegistros++;
+            return true;
+        }
+        return false;
+    }
 
-    // Método para calcular la eficiencia del recolector
     float calcularEficiencia() const {
-        if (historialRecolecciones.empty()) {
-            return 0.0;
-        }
-        return totalRecolectado / historialRecolecciones.size();
+        if (numRegistros == 0) return 0.0;
+        return totalRecolectado / numRegistros;
     }
 
-    // Método para generar reporte de actividad
-    std::string generarReporteActividad() const {
-        std::string reporte = "\n=== Reporte de Actividad ===";
-        reporte += "\nRecolector: " + nombre;
-        reporte += "\nZona: " + zona;
-        reporte += "\nRating: " + std::to_string(rating) + "/5";
-        reporte += "\nTotal recolectado: " + std::to_string(totalRecolectado) + " kg";
-        reporte += "\nEficiencia: " + std::to_string(calcularEficiencia()) + " kg/recolección";
-
-        reporte += "\n\nMateriales especializados:";
-        for (const auto& material : materialesEspecializados) {
-            reporte += "\n- " + material;
-        }
-
-        reporte += "\n\nMateriales actuales:";
-        for (const auto& material : materialesActuales) {
-            reporte += "\n- " + material.getNombre() + ": " + 
-                      std::to_string(material.getCantidad()) + " kg";
-        }
-
-        return reporte;
-    }
-
-    // Método para mostrar el perfil del recolector
     void mostrarPerfil() const {
         std::cout << "\n=== Perfil del Recolector ==="
                  << "\nNombre: " << nombre
@@ -92,29 +80,42 @@ public:
                  << "\nEficiencia: " << calcularEficiencia() << " kg/recolección"
                  << "\n\nMateriales especializados:";
         
-        for (const auto& material : materialesEspecializados) {
-            std::cout << "\n- " << material;
+        for (int i = 0; i < numEspecializaciones; i++) {
+            std::cout << "\n- " << materialesEspecializados[i];
         }
         std::cout << std::endl;
+
+        // Mostrar materiales actuales
+        if (numMaterialesActuales > 0) {
+            std::cout << "\nMateriales actuales:";
+            for (int i = 0; i < numMaterialesActuales; i++) {
+                std::cout << "\n- " << materialesActuales[i].getNombre() 
+                         << ": " << materialesActuales[i].getCantidad() << " kg";
+            }
+            std::cout << std::endl;
+        }
     }
 
     // Getters
-    std::string getNombre() const { return nombre; }
-    std::string getZona() const { return zona; }
+    const char* getNombre() const { return nombre; }
+    const char* getZona() const { return zona; }
     float getTotalRecolectado() const { return totalRecolectado; }
     int getRating() const { return rating; }
 
-    // Setters con validación
-    void setNombre(const std::string& _nombre) { nombre = _nombre; }
-    void setZona(const std::string& _zona) { zona = _zona; }
+    // Setters
+    void setNombre(const char* _nombre) {
+        strncpy(nombre, _nombre, 49);
+        nombre[49] = '\0';
+    }
+    
+    void setZona(const char* _zona) {
+        strncpy(zona, _zona, 49);
+        zona[49] = '\0';
+    }
+    
     void setRating(int _rating) {
-        if (_rating >= 1 && _rating <= 5) {
-            rating = _rating;
-        }
+        if (_rating >= 1 && _rating <= 5) rating = _rating;
     }
 };
 
-// La implementación de transferirMaterialACentro se hará en el archivo .cpp
-// o después de la definición de CentroAcopio para evitar dependencias circulares
-
-#endif // RECOLECTOR_H
+#endif

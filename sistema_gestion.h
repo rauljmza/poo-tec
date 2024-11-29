@@ -1,49 +1,70 @@
 #ifndef SISTEMA_GESTION_H
 #define SISTEMA_GESTION_H
 
-#include <string>
-#include <vector>
 #include "centro_acopio.h"
 #include "recolector.h"
 #include "material_reciclable.h"
 
+#define MAX_CENTROS 10
+#define MAX_RECOLECTORES 20
+#define MAX_MATERIALES_CATALOGO 30
+
 class SistemaGestion {
 private:
-    std::vector<CentroAcopio> centros;              // Centros de acopio registrados
-    std::vector<Recolector> recolectores;           // Recolectores registrados
-    std::vector<MaterialReciclable> catalogoMateriales;  // Catálogo de materiales
+    CentroAcopio centros[MAX_CENTROS];
+    int numCentros;
+    Recolector recolectores[MAX_RECOLECTORES];
+    int numRecolectores;
+    MaterialReciclable catalogoMateriales[MAX_MATERIALES_CATALOGO];
+    int numMaterialesCatalogo;
 
 public:
-    // Constructor que inicializa el catálogo con materiales básicos
     SistemaGestion() {
+        numCentros = 0;
+        numRecolectores = 0;
+        numMaterialesCatalogo = 0;
+        
         // Inicializar catálogo con materiales básicos
-        catalogoMateriales.push_back(
-            MaterialReciclable("PET", 0, 15.50, true, "Plástico", 450, 0.1));
-        catalogoMateriales.push_back(
-            MaterialReciclable("Vidrio", 0, 8.75, true, "Vidrio", 4000, 0.15));
-        catalogoMateriales.push_back(
-            MaterialReciclable("Papel", 0, 5.25, false, "Papel", 1, 0.05));
+        agregarMaterialCatalogo(MaterialReciclable("PET", 0, 15.50, true, "Plástico", 450, 0.1));
+        agregarMaterialCatalogo(MaterialReciclable("Vidrio", 0, 8.75, true, "Vidrio", 4000, 0.15));
+        agregarMaterialCatalogo(MaterialReciclable("Papel", 0, 5.25, false, "Papel", 1, 0.05));
     }
 
-    // Método para agregar un nuevo centro de acopio
-    void agregarCentroAcopio(const CentroAcopio& centro) {
-        centros.push_back(centro);
-        std::cout << "Centro de acopio agregado: " << centro.getNombre() << std::endl;
+    bool agregarCentroAcopio(const CentroAcopio& centro) {
+        if (numCentros < MAX_CENTROS) {
+            centros[numCentros] = centro;
+            numCentros++;
+            std::cout << "Centro de acopio agregado: " << centro.getNombre() << std::endl;
+            return true;
+        }
+        return false;
     }
 
-    // Método para registrar un nuevo recolector
-    void registrarRecolector(const Recolector& recolector) {
-        recolectores.push_back(recolector);
-        std::cout << "Recolector registrado: " << recolector.getNombre() << std::endl;
+    bool registrarRecolector(const Recolector& recolector) {
+        if (numRecolectores < MAX_RECOLECTORES) {
+            recolectores[numRecolectores] = recolector;
+            numRecolectores++;
+            std::cout << "Recolector registrado: " << recolector.getNombre() << std::endl;
+            return true;
+        }
+        return false;
     }
 
-    // Método para asignar un recolector a un centro
-    bool asignarRecolectorACentro(const std::string& nombreRecolector, const std::string& nombreCentro) {
-        for (auto& centro : centros) {
-            if (centro.getNombre() == nombreCentro) {
-                for (const auto& recolector : recolectores) {
-                    if (recolector.getNombre() == nombreRecolector) {
-                        return centro.asignarRecolector(recolector);
+    bool agregarMaterialCatalogo(const MaterialReciclable& material) {
+        if (numMaterialesCatalogo < MAX_MATERIALES_CATALOGO) {
+            catalogoMateriales[numMaterialesCatalogo] = material;
+            numMaterialesCatalogo++;
+            return true;
+        }
+        return false;
+    }
+
+    bool asignarRecolectorACentro(const char* nombreRecolector, const char* nombreCentro) {
+        for (int i = 0; i < numCentros; i++) {
+            if (strcmp(centros[i].getNombre(), nombreCentro) == 0) {
+                for (int j = 0; j < numRecolectores; j++) {
+                    if (strcmp(recolectores[j].getNombre(), nombreRecolector) == 0) {
+                        return centros[i].asignarRecolector(recolectores[j]);
                     }
                 }
             }
@@ -51,63 +72,23 @@ public:
         return false;
     }
 
-    // Método para buscar el centro más cercano
-    CentroAcopio* buscarCentroMasCercano(const std::string& ubicacion) {
-        // Versión simplificada: retorna el primer centro disponible
-        if (!centros.empty()) {
-            return &centros[0];
-        }
-        return nullptr;
-    }
-
-    // Método para generar reporte global
-    std::string generarReporteGlobal() const {
-        std::string reporte = "\n====== REPORTE GLOBAL DEL SISTEMA ======\n";
-
-        // Resumen de centros de acopio
-        reporte += "\nCENTROS DE ACOPIO (" + std::to_string(centros.size()) + ")";
-        reporte += "\n----------------------------------";
-        for (const auto& centro : centros) {
-            reporte += "\n\nCentro: " + centro.getNombre();
-            reporte += "\nUbicación: " + centro.getUbicacion();
-            reporte += "\nCapacidad utilizada: " + 
-                      std::to_string((centro.getCapacidadActual() / 
-                                    centro.getCapacidadMaxima()) * 100) + "%";
-        }
-
-        // Resumen de recolectores
-        reporte += "\n\nRECOLECTORES (" + std::to_string(recolectores.size()) + ")";
-        reporte += "\n----------------------------------";
-        for (const auto& recolector : recolectores) {
-            reporte += "\n\nNombre: " + recolector.getNombre();
-            reporte += "\nZona: " + recolector.getZona();
-            reporte += "\nTotal recolectado: " + 
-                      std::to_string(recolector.getTotalRecolectado()) + " kg";
-        }
-
-        return reporte;
-    }
-
-    // Método para calcular estadísticas generales
     void calcularEstadisticasGenerales() const {
         float totalMaterialRecolectado = 0;
         float capacidadTotalSistema = 0;
         float capacidadUtilizada = 0;
 
-        // Calcular totales
-        for (const auto& recolector : recolectores) {
-            totalMaterialRecolectado += recolector.getTotalRecolectado();
+        for (int i = 0; i < numRecolectores; i++) {
+            totalMaterialRecolectado += recolectores[i].getTotalRecolectado();
         }
 
-        for (const auto& centro : centros) {
-            capacidadTotalSistema += centro.getCapacidadMaxima();
-            capacidadUtilizada += centro.getCapacidadActual();
+        for (int i = 0; i < numCentros; i++) {
+            capacidadTotalSistema += centros[i].getCapacidadMaxima();
+            capacidadUtilizada += centros[i].getCapacidadActual();
         }
 
-        // Mostrar estadísticas
         std::cout << "\n=== Estadísticas Generales del Sistema ==="
-                 << "\nTotal de centros de acopio: " << centros.size()
-                 << "\nTotal de recolectores: " << recolectores.size()
+                 << "\nTotal de centros: " << numCentros
+                 << "\nTotal de recolectores: " << numRecolectores
                  << "\nTotal material recolectado: " << totalMaterialRecolectado << " kg"
                  << "\nCapacidad total del sistema: " << capacidadTotalSistema << " kg"
                  << "\nCapacidad utilizada: " << capacidadUtilizada << " kg"
@@ -117,20 +98,17 @@ public:
                  << "%" << std::endl;
     }
 
-    // Método para mostrar catálogo de materiales
     void mostrarCatalogoMateriales() const {
-        std::cout << "\n=== Catálogo de Materiales ==="
-                 << "\nMateriales disponibles:" << std::endl;
-        
-        for (const auto& material : catalogoMateriales) {
-            material.mostrarDatos();
+        std::cout << "\n=== Catálogo de Materiales ===\n";
+        for (int i = 0; i < numMaterialesCatalogo; i++) {
+            catalogoMateriales[i].mostrarDatos();
         }
     }
 
-    // Getters para estadísticas básicas
-    size_t getTotalCentros() const { return centros.size(); }
-    size_t getTotalRecolectores() const { return recolectores.size(); }
-    size_t getTotalMaterialesCatalogo() const { return catalogoMateriales.size(); }
+    // Getters
+    size_t getTotalCentros() const { return numCentros; }
+    size_t getTotalRecolectores() const { return numRecolectores; }
+    size_t getTotalMaterialesCatalogo() const { return numMaterialesCatalogo; }
 };
 
-#endif // SISTEMA_GESTION_H
+#endif

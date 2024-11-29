@@ -1,24 +1,40 @@
 #ifndef REGISTRO_RECOLECCION_H
 #define REGISTRO_RECOLECCION_H
 
-#include <string>
 #include <iostream>
+#include <string.h>
 
 class RegistroRecoleccion {
 private:
-    std::string fecha;            // Fecha de la recolección
-    std::string tipoMaterial;     // Tipo de material recolectado
-    float cantidad;               // Cantidad recolectada en kg
-    std::string ubicacion;        // Ubicación donde se realizó la recolección
+    char fecha[20];
+    char tipoMaterial[30];
+    float cantidad;
+    char ubicacion[50];
     
 public:
-    // Constructor
-    RegistroRecoleccion(std::string _fecha, std::string _tipoMaterial, 
-                       float _cantidad, std::string _ubicacion) 
-        : fecha(_fecha), tipoMaterial(_tipoMaterial), 
-          cantidad(_cantidad), ubicacion(_ubicacion) {}
+    // Constructor por defecto
+    RegistroRecoleccion() {
+        fecha[0] = '\0';
+        tipoMaterial[0] = '\0';
+        cantidad = 0.0;
+        ubicacion[0] = '\0';
+    }
+
+    // Constructor con parámetros
+    RegistroRecoleccion(const char* _fecha, const char* _tipoMaterial,
+                       float _cantidad, const char* _ubicacion) {
+        strncpy(fecha, _fecha, 19);
+        fecha[19] = '\0';
+        
+        strncpy(tipoMaterial, _tipoMaterial, 29);
+        tipoMaterial[29] = '\0';
+        
+        cantidad = _cantidad;
+        
+        strncpy(ubicacion, _ubicacion, 49);
+        ubicacion[49] = '\0';
+    }
     
-    // Método para mostrar los detalles del registro
     void mostrarDetalle() const {
         std::cout << "\n=== Detalle de Recolección ==="
                  << "\nFecha: " << fecha
@@ -28,12 +44,24 @@ public:
     }
     
     // Getters
-    std::string getFecha() const { return fecha; }
-    std::string getTipoMaterial() const { return tipoMaterial; }
+    const char* getFecha() const { return fecha; }
+    const char* getTipoMaterial() const { return tipoMaterial; }
     float getCantidad() const { return cantidad; }
-    std::string getUbicacion() const { return ubicacion; }
+    const char* getUbicacion() const { return ubicacion; }
 
-    // No incluimos setters porque un registro no debería modificarse una vez creado
+    // Operador de asignación
+    RegistroRecoleccion& operator=(const RegistroRecoleccion& otro) {
+        if (this != &otro) {
+            strncpy(fecha, otro.fecha, 19);
+            fecha[19] = '\0';
+            strncpy(tipoMaterial, otro.tipoMaterial, 29);
+            tipoMaterial[29] = '\0';
+            cantidad = otro.cantidad;
+            strncpy(ubicacion, otro.ubicacion, 49);
+            ubicacion[49] = '\0';
+        }
+        return *this;
+    }
 };
 
-#endif // REGISTRO_RECOLECCION_H
+#endif

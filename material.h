@@ -1,33 +1,28 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include <string>
+#include <string.h>
 #include <iostream>
 
 class Material {
 protected:
-    std::string nombre;        // Nombre del material
-    float cantidad;           // Cantidad en kilogramos
-    float precioBase;        // Precio por kilogramo
+    char nombre[50];
+    float cantidad;
+    float precioBase;
     
 public:
-    // Constructor con valores por defecto
-    Material(std::string _nombre = "", float _cantidad = 0.0, float _precioBase = 0.0) {
-        nombre = _nombre;
+    Material(const char* _nombre = "", float _cantidad = 0.0, float _precioBase = 0.0) {
+        strncpy(nombre, _nombre, 49);
+        nombre[49] = '\0';
         cantidad = _cantidad;
         precioBase = _precioBase;
     }
     
-    // Destructor virtual
-    virtual ~Material() = default;
-        
-    // Método virtual para calcular el valor del material
-    virtual float calcularValor() const {
+    float calcularValor() const {
         return cantidad * precioBase;
     }
         
-    // Método virtual para mostrar información del material
-    virtual void mostrarDatos() const {
+    void mostrarDatos() const {
         std::cout << "\nInformación del Material"
                  << "\nNombre: " << nombre
                  << "\nCantidad: " << cantidad << " kg"
@@ -35,19 +30,22 @@ public:
                  << "\nValor total: $" << calcularValor() << std::endl;
     }
         
-    // Getters
-    std::string getNombre() const { return nombre; }
+    const char* getNombre() const { return nombre; }
     float getCantidad() const { return cantidad; }
     float getPrecioBase() const { return precioBase; }
         
-    // Setters
-    void setNombre(std::string _nombre) { nombre = _nombre; }
+    void setNombre(const char* _nombre) {
+        strncpy(nombre, _nombre, 49);
+        nombre[49] = '\0';
+    }
+    
     void setCantidad(float _cantidad) {
         if (_cantidad >= 0) cantidad = _cantidad;
     }
+    
     void setPrecioBase(float _precio) {
         if (_precio >= 0) precioBase = _precio;
     }
 };
 
-#endif // MATERIAL_H
+#endif
